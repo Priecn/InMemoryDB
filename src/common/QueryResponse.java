@@ -1,22 +1,20 @@
 package common;
 
-public class QueryResponse<T> {
-    int responseCode;
-    T response;
+public class QueryResponse {
+    private final int responseCode;
+    private final Object response;
+
+    public QueryResponse(int responseCode, Object response) {
+        this.responseCode = responseCode;
+        this.response = response;
+    }
 
     public int getResponseCode() {
         return responseCode;
     }
 
-    public void setResponseCode(int responseCode) {
-        this.responseCode = responseCode;
-    }
-
-    public T getResponse() {
+    public Object getResponse() {
         return response;
     }
 
-    public void setResponse(T response) {
-        this.response = response;
-    }
 }

@@ -5,7 +5,6 @@ import exception.ErrorResponse;
 import index.TableIndex;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Table {
     private final TableSchema tableSchema;
@@ -67,18 +66,35 @@ public class Table {
         return 1;
     }
 
-    public List<List<String>> get(List<String> columns, List<RowFilter> filters ) {
-        List<TableIndex> indicesToApply = new ArrayList<>();
+    public List<List<String>> select(List<Integer> columns, List<RowFilter> filters ) {
+
+        Set<Object> filteredData = new HashSet<>();
 
         for (RowFilter rowFilter: filters) {
-            indicesToApply.addAll(indexMap.values().stream()
-                    .filter(index -> index.getColumnName().equalsIgnoreCase(rowFilter.column)).toList());
+            List<TableIndex> indicesToApply = indexMap.values().stream()
+                    .filter(index -> index.getColumnName().equalsIgnoreCase(rowFilter.column)).toList();
+
+            if (filteredData.isEmpty()) {
+                filteredData = indicesToApply.getFirst().getFilteredData(rowFilter);
+            } else {
+                filteredData.retainAll(indicesToApply.getFirst().getFilteredData(rowFilter));
+            }
         }
+        List<List<String>> dataToReturn = new ArrayList<>();
+        filteredData.forEach(f -> {
+            List<String> row = new ArrayList<>();
+            for (int pos: columns) {
+                Object val = data.get(f).rowData.get(pos);
+                if (val != null) {
+                    row.add(String.valueOf(val));
+                } else {
+                    row.add("");
+                }
+            }
+            dataToReturn.add(row);
+        });
+        return dataToReturn;
 
-        // TODO apply indicesToApply based on filters to fetch list of primary keys
-        // Then from data map fetch actual data
-
-        return null;
     }
 
     private void updateIndex(Map<String, String> rowDataToInsert) {

@@ -30,6 +30,8 @@ public class Database {
 
         int index = 4;
 
+        int colPos = 2;
+
         while (index < tokens.size()-1) {
             List<String> current = new ArrayList<>();
 
@@ -64,7 +66,8 @@ public class Database {
                     }
                 }
 
-                tableSchema.addColumn(columnName, type, isRequired, isNullable);
+                tableSchema.addColumn(colPos, columnName, type, isRequired, isNullable);
+                colPos++;
             }
 
             index++;

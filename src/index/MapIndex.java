@@ -1,10 +1,13 @@
 package index;
 
+import engine.RowFilter;
+import engine.RowFilterType;
+
 import java.util.*;
 
 public class MapIndex implements TableIndex{
 
-    Map<Object, Set<Object>> index;
+    TreeMap<Object, Set<Object>> index;
     String columnName;
 
     public MapIndex(String columnName) {
@@ -12,6 +15,7 @@ public class MapIndex implements TableIndex{
         index = new TreeMap<>();
     }
 
+    @Override
     public String getColumnName() {
         return columnName;
     }
@@ -33,6 +37,28 @@ public class MapIndex implements TableIndex{
             index.remove(column);
         }
 
+    }
+
+    @Override
+    public Set<Object> getFilteredData(RowFilter rowFilter) {
+        if (rowFilter.getType() == RowFilterType.EQ) {
+            return index.get(rowFilter.getFilterData());
+        } else if (rowFilter.getType() == RowFilterType.LTE) {
+            Object start = index.firstKey();
+            Object end = index.floorKey(rowFilter.getFilterData());
+
+            SortedMap<Object, Set<Object>> filtered = index.subMap(start, end);
+
+            return new HashSet<>(filtered.values());
+        } else if (rowFilter.getType() == RowFilterType.GTE) {
+            Object start = index.ceilingKey(rowFilter.getFilterData());
+            Object end = index.lastKey();
+
+            SortedMap<Object, Set<Object>> filtered = index.subMap(start, end);
+
+            return new HashSet<>(filtered.values());
+        }
+        return new HashSet<>();
     }
 
     @Override
